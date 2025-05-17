@@ -1,67 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarCheck, Clock, MapPin, Users } from 'lucide-react';
+import { fetchEvents } from '../lib/strapi';
 
 interface Event {
   id: number;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  category: string;
-  description: string;
-  capacity: number;
-  spots_left: number;
+  attributes: {
+    title: string;
+    date: string;
+    time: string;
+    location: string;
+    category: string;
+    description: string;
+    capacity: number;
+    spots_left: number;
+  };
 }
-
-const events: Event[] = [
-  {
-    id: 1,
-    title: "Business Plan Essentials Workshop",
-    date: "June 15, 2025",
-    time: "10:00 AM - 12:00 PM",
-    location: "BIC Conference Room A",
-    category: "Workshop",
-    description: "Learn the fundamentals of creating a compelling business plan that will help secure funding and guide your business growth.",
-    capacity: 20,
-    spots_left: 8,
-  },
-  {
-    id: 2,
-    title: "Funding Strategies for Startups",
-    date: "June 22, 2025",
-    time: "2:00 PM - 4:00 PM",
-    location: "BIC Conference Room B",
-    category: "Seminar",
-    description: "Explore various funding options available for startups, from traditional loans to innovative crowdfunding approaches.",
-    capacity: 25,
-    spots_left: 12,
-  },
-  {
-    id: 3,
-    title: "Green Technology Networking Event",
-    date: "June 28, 2025",
-    time: "5:30 PM - 7:30 PM",
-    location: "RCC Main Hall",
-    category: "Networking",
-    description: "Connect with entrepreneurs and professionals in the green technology sector to share insights and explore collaboration opportunities.",
-    capacity: 50,
-    spots_left: 23,
-  },
-  {
-    id: 4,
-    title: "Digital Marketing for Small Businesses",
-    date: "July 5, 2025",
-    time: "1:00 PM - 3:00 PM",
-    location: "BIC Conference Room A",
-    category: "Workshop",
-    description: "Learn cost-effective digital marketing strategies to increase your business visibility and attract more customers.",
-    capacity: 20,
-    spots_left: 15,
-  },
-];
 
 const EventCard: React.FC<{ event: Event }> = ({ event }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { attributes: eventData } = event;
 
   const categoryColors: Record<string, string> = {
     Workshop: 'bg-blue-100 text-blue-800',
@@ -74,28 +31,28 @@ const EventCard: React.FC<{ event: Event }> = ({ event }) => {
       <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-100 hover:border-blue-100">
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-bold text-gray-900">{event.title}</h3>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${categoryColors[event.category] || 'bg-gray-100 text-gray-800'}`}>
-              {event.category}
+            <h3 className="text-xl font-bold text-gray-900">{eventData.title}</h3>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${categoryColors[eventData.category] || 'bg-gray-100 text-gray-800'}`}>
+              {eventData.category}
             </span>
           </div>
-          <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
+          <p className="text-gray-600 mb-4 line-clamp-2">{eventData.description}</p>
           <div className="space-y-2 mb-6">
             <div className="flex items-center text-sm text-gray-500">
               <CalendarCheck className="h-4 w-4 mr-2 text-blue-800" />
-              {event.date}
+              {eventData.date}
             </div>
             <div className="flex items-center text-sm text-gray-500">
               <Clock className="h-4 w-4 mr-2 text-blue-800" />
-              {event.time}
+              {eventData.time}
             </div>
             <div className="flex items-center text-sm text-gray-500">
               <MapPin className="h-4 w-4 mr-2 text-blue-800" />
-              {event.location}
+              {eventData.location}
             </div>
             <div className="flex items-center text-sm text-gray-500">
               <Users className="h-4 w-4 mr-2 text-blue-800" />
-              {event.spots_left} spots left
+              {eventData.spots_left} spots left
             </div>
           </div>
           <button 
@@ -124,26 +81,26 @@ const EventCard: React.FC<{ event: Event }> = ({ event }) => {
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3 className="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                      {event.title}
+                      {eventData.title}
                     </h3>
                     <div className="mt-4">
-                      <p className="text-sm text-gray-600 mb-4">{event.description}</p>
+                      <p className="text-sm text-gray-600 mb-4">{eventData.description}</p>
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center text-sm text-gray-500">
                           <CalendarCheck className="h-4 w-4 mr-2 text-blue-800" />
-                          {event.date}
+                          {eventData.date}
                         </div>
                         <div className="flex items-center text-sm text-gray-500">
                           <Clock className="h-4 w-4 mr-2 text-blue-800" />
-                          {event.time}
+                          {eventData.time}
                         </div>
                         <div className="flex items-center text-sm text-gray-500">
                           <MapPin className="h-4 w-4 mr-2 text-blue-800" />
-                          {event.location}
+                          {eventData.location}
                         </div>
                         <div className="flex items-center text-sm text-gray-500">
                           <Users className="h-4 w-4 mr-2 text-blue-800" />
-                          Capacity: {event.capacity} (Only {event.spots_left} spots left)
+                          Capacity: {eventData.capacity} (Only {eventData.spots_left} spots left)
                         </div>
                       </div>
                       <div className="bg-gray-50 p-3 rounded-md">
@@ -183,6 +140,31 @@ const EventCard: React.FC<{ event: Event }> = ({ event }) => {
 };
 
 const EventsSection: React.FC = () => {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      const data = await fetchEvents();
+      setEvents(data);
+      setLoading(false);
+    };
+
+    loadEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="events" className="py-16 md:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-lg text-gray-600">Loading events...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="events" className="py-16 md:py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
