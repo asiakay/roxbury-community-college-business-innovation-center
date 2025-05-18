@@ -142,12 +142,19 @@ const EventCard: React.FC<{ event: Event }> = ({ event }) => {
 const EventsSection: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadEvents = async () => {
-      const data = await fetchEvents();
-      setEvents(data);
-      setLoading(false);
+      try {
+        const data = await fetchEvents();
+        setEvents(data || []);
+      } catch (err) {
+        setError('Failed to load events');
+        console.error('Error loading events:', err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadEvents();
@@ -159,6 +166,18 @@ const EventsSection: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-lg text-gray-600">Loading events...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="events" className="py-16 md:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-lg text-red-600">{error}</p>
           </div>
         </div>
       </section>
@@ -178,11 +197,17 @@ const EventsSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
+        {events.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center">
+            <p className="text-lg text-gray-600">No upcoming events at this time.</p>
+          </div>
+        )}
 
         <div className="mt-12 text-center">
           <button className="px-6 py-3 bg-white text-blue-800 border border-blue-800 rounded-md hover:bg-blue-50 transition duration-300">
